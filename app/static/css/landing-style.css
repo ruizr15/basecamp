@@ -1,0 +1,11 @@
+body {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+    align-items: center;
+    background-color: lightgray;
+}
+
+hr {
+    border: 0px;
+}
