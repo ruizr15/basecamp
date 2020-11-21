@@ -6,8 +6,7 @@ import json
 
 @app.route("/")
 def index():
-    return redirect("/coordinates")
-    # return render_template("index.html")
+    return redirect("/parks")
 
 @app.route("/login")
 def login():
@@ -19,7 +18,7 @@ def coordinates():
 
 @app.route("/weather", methods=["GET", "POST"])
 def weather():
-    forecast_today = "today's weather: "
+    forecast_today = "Today's weather: "
     if request.method == "POST":
         lat = request.form["latitude"]
         lon = request.form["longitude"]
@@ -35,7 +34,6 @@ def weather():
         forecast_today += more_data['properties']['periods'][0]['shortForecast']
         return forecast_today
 
-
-@app.route("/json", methods=["POST"])
-def json():
-    req = request.get_json()
+@app.route("/parks")
+def parks():
+    return render_template("parks.html")
