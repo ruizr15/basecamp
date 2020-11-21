@@ -1,9 +1,21 @@
 from app import app
 from flask import render_template, request, redirect, url_for, flash
+import json, requests
 
-@app.route("/")
+
+@app.route("/", methods=["POST", "GET"])
 def index():
-    return render_template("index.html")
+    if request.method == "POST":
+        state=request.form["state"]
+        if state != "":
+            endpoint = "https://developer.nps.gov/api/v1/campgrounds?stateCode="+ str(state) + "&api_key=obuJbz67KmzxqsJAANbZ7Aem40o9jXusUJwtuHwe"
+            HEADERS = {"Authorization": "obuJbz67KmzxqsJAANbZ7Aem40o9jXusUJwtuHwe"}
+            req = requests.get(endpoint)
+            return render_template("index.html", info=req.text)
+        else:
+            return render_template("index.html", info="Input your state to begin")
+    else:
+        return render_template("index.html", info="Input your state to begin")
 
 @app.route("/login")
 def login():
