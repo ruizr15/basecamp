@@ -2,11 +2,48 @@ from app import app
 from flask import render_template, request, redirect, url_for, flash, jsonify
 import json, requests
 
-global park_list
-park_list = []
-global selected_park
-selected_park = {}
 NPSAPIKEY = "***REMOVED***"
+
+global park_list
+global selected_park
+global forecasts
+
+park_list = []
+selected_park = {}
+forecasts = []
+
+
+# Returns list of weather forecasts for given coordinates
+def get_forecasts(latitude, longitude):
+    # Pulls data from weather API to convert coordinates to grid
+    url = "https://api.weather.gov/points/" + latitude + "," + longitude
+    r = requests.get(url)
+    data = r.json()
+    gridID = data["properties"]["gridId"]
+    gridX = data["properties"]["gridX"]
+    gridY = data["properties"]["gridY"]
+    # Uses grid coordinates to get forecasts
+    url2 = "https://api.weather.gov/gridpoints/"+gridID+"/"+str(gridX)+","+str(gridY)+"/forecast"
+    v = requests.get(url2)
+    more_data = v.json()
+    return more_data["properties"]["periods"]
+
+# Returns url for weather icon for a given forecast string
+def weather_icon(forecast):
+    for word in forecast.split():
+        word = word.lower()
+        if word == "cloudy":
+            return "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-22-256.png"
+        if word == "rain":
+            return "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-30-256.png"
+        if (word == "sunny" or word == "clear"):
+            return "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/sun-256.png"
+        if word == "snow":
+            return "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-24-256.png"
+        if (word == "thunder" or word == "lightning" or word == "thunderstorm"):
+            return "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/flash-cloud-256.png"
+        else:
+            print(word)
 
 @app.route("/", methods=["POST", "GET"])
 def index():
@@ -25,20 +62,20 @@ def coordinates():
 
 @app.route("/weather", methods=["GET", "POST"])
 def weather():
-    forecast_today = "Today's weather: "
     if request.method == "POST":
+        headers = {"User-Agent": "Basecamp, ricardoruiz358@gmail.com"}
         lat = request.form["latitude"]
         lon = request.form["longitude"]
         url = "https://api.weather.gov/points/" + str(lat) + "," + str(lon)
-        r = requests.get(url)
+        r = requests.get(url, headers)
         data = r.json()
         gridID = data['properties']['gridId']
         gridX = data['properties']['gridX']
         gridY = data['properties']['gridY']
         url2 = "https://api.weather.gov/gridpoints/"+gridID+"/"+str(gridX)+","+str(gridY)+"/forecast"
-        v = requests.get(url2)
+        v = requests.get(url2, headers)
         more_data = v.json()
-        forecast_today += more_data['properties']['periods'][0]['shortForecast']
+        forecast = more_data['properties']['periods'][0]['shortForecast']
         return forecast_today
 
 
@@ -69,9 +106,23 @@ def parks():
 def parkHandler():
     if request.method == "POST":
         global selected_park
+        global forecasts
+        # Stores the park chosen by user as global variable
         selected_park = park_list[int(request.form["park_index"])]
-        return redirect("/")
+        lat = str(selected_park["latitude"])
+        lon = str(selected_park["longitude"])
+        if (lat == "" or lon == ""):
+            forecasts = ["no data available"]
+        # Gets weather forecast
+        forecasts = get_forecasts(lat, lon)
+        print(forecasts[0]['shortForecast'])
+        return redirect("/display")
 
 @app.route("/display")
 def display():
-    return render_template("display.html")
+    global forecasts
+    icon_urls = []
+    if forecasts[0] != "no data available":
+        for forecast in forecasts:
+            icon_urls.append(weather_icon(forecast['shortForecast']))
+    return render_template("display.html", forecasts=forecasts, icon_urls=icon_urls)
