@@ -91,7 +91,7 @@
         <h2 class="ui header">No campsites are available in this area. Sorry!</h2>
     {% endif %}
 
-    {% if park_list != "no parks found" %}
+    {% if park_list[0] != "no parks found" %}
         <form action="/park-handler" method="POST">
             <div class="ui container">
                 <div class="ui grid" style="text-align:left">
