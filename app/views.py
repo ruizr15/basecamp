@@ -130,16 +130,26 @@ def display():
             thingstodo.append(thing)
     # stuff for weather icons
     global forecasts
+    weekend_forecast = {}
     icon_urls = []
     if forecasts[0] != "no data available":
         for forecast in forecasts:
             icon_urls.append(weather_icon(forecast['shortForecast']))
+            if forecast["name"] == "Saturday":
+                weekend_forecast = forecast
 
     packingList = {"Clothing": [], "Personal Gear": []}
 
-    temperature = 50
-    rainy = False
-    clear = True
+    temperature = weekend_forecast["temperature"]
+    if (weather_icon(weekend_forecast["shortForecast"]) == "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-30-256.png"):
+        rainy = True
+    else:
+        rainy = False
+    
+    if (weather_icon(weekend_forecast["shortForecast"]) == "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/sun-256.png"):
+        clear = True
+    else:
+        clear = False
 
     if temperature > 60:
         packingList["Clothing"].append("Shorts")
