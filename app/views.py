@@ -1,6 +1,6 @@
 from app import app
 from flask import render_template, request, redirect, url_for, flash, jsonify
-from datetime import date
+import datetime
 import json, requests
 
 NPSAPIKEY = "obuJbz67KmzxqsJAANbZ7Aem40o9jXusUJwtuHwe"
@@ -17,7 +17,6 @@ forecasts = []
 def get_forecasts(latitude, longitude):
     # Pulls data from weather API to convert coordinates to grid
     url = "https://api.weather.gov/points/" + latitude + "," + longitude
-    print("get data pull from url " + url)
     r = requests.get(url)
     data = r.json()
     gridID = data["properties"]["gridId"]
@@ -43,13 +42,13 @@ def weather_icon(forecast):
             return "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-24-256.png"
         if (word == "thunder" or word == "lightning" or word == "thunderstorm"):
             return "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/flash-cloud-256.png"
-        else:
-            print(word)
 
 # Gets next days of the week for a certain number of days of the week
 def next_days(duration):
-    today = datetime.datetime.today().weekday()
-    
+    today_code = datetime.datetime.today().weekday()
+    day_list = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    today = day_list[today_code]
+    tomorrow = day_list[today]
 
 @app.route("/", methods=["POST", "GET"])
 def index():
@@ -65,7 +64,6 @@ def login():
 @app.route("/parks", methods=["GET", "POST"])
 def parks():
     global park_list
-    icon_urls = []
     # Pulls NPS list of campsites from user-inputted state
     if request.method == "POST":
         # Formats user input
@@ -95,6 +93,7 @@ def parkHandler():
     if request.method == "POST":
         global selected_park
         global forecasts
+        forecasts = []
         # Stores the park chosen by user as global variable
         selected_park = park_list[int(request.form["park_index"])]
         lat = str(selected_park["latitude"])
@@ -104,7 +103,6 @@ def parkHandler():
             return redirect("/display")
         # Gets weather forecast
         forecasts = get_forecasts(lat, lon)
-        print(forecasts[0]['shortForecast'])
         return redirect("/display")
 
 @app.route("/display")
@@ -114,4 +112,4 @@ def display():
     if forecasts[0] != "no data available":
         for forecast in forecasts:
             icon_urls.append(weather_icon(forecast['shortForecast']))
-    return render_template("display.html", forecasts=forecasts, icon_urls=icon_urls)
+        return render_template("display.html", forecasts=forecasts, icon_urls=icon_urls)
