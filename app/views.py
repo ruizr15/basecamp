@@ -4,6 +4,8 @@ import json, requests
 
 global park_list
 park_list = []
+global selected_park
+selected_park = {}
 NPSAPIKEY = "***REMOVED***"
 
 @app.route("/", methods=["POST", "GET"])
@@ -40,17 +42,29 @@ def weather():
 @app.route("/parks", methods=["GET", "POST"])
 def parks():
     global park_list
+    # Pulls NPS list of campsites from user-inputted state
     if request.method == "POST":
+        # Formats user input
         park_list.clear()
         state = request.form["state"]
         if state == "00":
             return render_template("parks.html", park_list=[])
+        # Pulls data from NPS
         endpoint = "https://developer.nps.gov/api/v1/campgrounds?stateCode="+ str(state) + "&api_key=" + NPSAPIKEY
         req = requests.get(endpoint)
         data = req.json()
+        # Error case if NPS data comes back empty
         if data['total'] == "0":
             return render_template("parks.html", park_list=["no parks found"])
         for park in data['data']:
-            park_list.append(park['name'])
+            park_list.append(park)
+        # Pass data to HTML
         return render_template("parks.html", park_list=park_list)
     return render_template("parks.html", park_list=[])
+
+@app.route("/park-handler", methods=["GET", "POST"])
+def parkHandler():
+    if request.method == "POST":
+        global selected_park
+        selected_park = park_list[int(request.form["park_index"])]
+        return redirect("/")
