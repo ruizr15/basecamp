@@ -27,6 +27,85 @@ def get_coordinates(name):
         coordinates.append(float(item["geometry"]["location"]["lng"]))
     return coordinates
 
+def weather_icon(forecast):
+    for word in forecast.split():
+        word = word.lower()
+        if word == "cloudy":
+            return "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-22-256.png"
+        if word == "rain":
+            return "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-30-256.png"
+        if (word == "sunny" or word == "clear"):
+            return "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/sun-256.png"
+        if word == "snow":
+            return "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-24-256.png"
+        if (word == "thunder" or word == "lightning" or word == "thunderstorm"):
+            return "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/flash-cloud-256.png"
+
+def get_forecasts(name, coordinates, days):
+    # Instantiate important variables
+    lat = str(coordinates[0])
+    lng = str(coordinates[1])
+    failed = False
+    forecast_list = []
+    forecast = {}
+    weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday','Sunday']
+
+    # If lat and long are empty, use GMaps to try to resolve
+    if (lat == "" or lng == ""):
+        coords = get_coordinates(name)
+        if len(coords) == 0: 
+            failed = True
+        else:
+            lat = str(coords[0])
+            lng = str(coords[1])
+
+    # Use weather API to turn lat, long into grid
+    coordinate_url = "https://api.weather.gov/points/%s,%s" % (lat, lng)
+    coordinate_request = requests.get(coordinate_url)
+    coordinate_data = coordinate_request.json()
+    
+    # Check if proper formatting is present
+    if ("properties" in coordinate_data):
+        gridID = coordinate_data["properties"]["gridId"]
+        gridX = str(coordinate_data["properties"]["gridX"])
+        gridY = str(coordinate_data["properties"]["gridY"])
+    else:
+        failed = True
+
+    # Use grid data to get forecast from weather API
+    grid_url = "https://api.weather.gov/gridpoints/%s/%s,%s/forecast" % (gridID, gridX, gridY)
+    grid_request = requests.get(grid_url)
+    weather_data = grid_request.json()
+
+    # Format incoming data into usable dictionary
+    special_case = True
+    if "properties" in weather_data:
+        if "periods" in weather_data["properties"]:
+            print("")
+            print("true")
+            print("")
+            for period in weather_data["properties"]["periods"]:
+                if (period["name"] in weekdays) or ((special_case) and (period["name"] == "Today" or "Tonight")):
+                    if (period["name"] == "Today" or "Tonight"): 
+                        special_case = False
+                    # Creates a new forecast dict to append to the list, then deletes it
+                    forecast = {}
+                    forecast["day"] = period["name"]
+                    forecast["shortForecast"] = period["shortForecast"]
+                    forecast["longForecast"] = period["detailedForecast"]
+                    forecast["temperature"] = period["temperature"]
+                    forecast["iconUrl"] = weather_icon(period["shortForecast"])
+                    forecast["valid"] = not failed
+                    print(forecast["day"])
+                    forecast_list.append(forecast)
+                    del(forecast)
+        else:
+            failed = True
+    else:
+        failed = True
+    return forecast_list[0:days]
+
+"""
 # Returns list of weather forecasts for given coordinates
 def get_forecasts(latitude, longitude):
     # Pulls data from weather API to convert coordinates to grid
@@ -44,7 +123,6 @@ def get_forecasts(latitude, longitude):
     except KeyError:
         return "data unavailable"
 
-# Returns url for weather icon for a given forecast string
 def weather_icon(forecast):
     for word in forecast.split():
         word = word.lower()
@@ -58,8 +136,6 @@ def weather_icon(forecast):
             return "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-24-256.png"
         if (word == "thunder" or word == "lightning" or word == "thunderstorm"):
             return "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/flash-cloud-256.png"
-        if word == "unavailable":
-            return "https://cdn0.iconfinder.com/data/icons/free-daily-icon-set/512/Wrong-256.png"
 
 # Gets next days of the week for a certain number of days of the week
 def next_days(duration):
@@ -87,7 +163,7 @@ def get_weekday_forecasts(forecast_list, duration):
             working_forecast["iconUrl"] = "https://cdn0.iconfinder.com/data/icons/free-daily-icon-set/512/Wrong-256.png"
         weekday_forecasts[day] = working_forecast
     return weekday_forecasts
-
+"""
 
 @app.route("/", methods=["POST", "GET"])
 def index():
@@ -168,5 +244,6 @@ def display():
 
 @app.route("/testing")
 def testing():
-    print(get_coordinates("Hickory Hill Wilderness Campsite"))
+    forecasts = get_forecasts("hello", [33, -84], 3)
+    print(forecasts)
     return "hello"
