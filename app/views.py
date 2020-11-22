@@ -14,6 +14,8 @@ def index():
 
 @app.route("/login")
 def login():
+    if request.method == "POST":
+        return redirect("/coordinates")
     return render_template("login.html")
 
 @app.route("/coordinates", methods=["GET", "POST"])
@@ -69,5 +71,6 @@ def parkHandler():
         selected_park = park_list[int(request.form["park_index"])]
         return redirect("/")
 
-@app.route("/parkDisplay", methods=["GET", "POST"])
-def parkDisplay():
+@app.route("/display")
+def display():
+    return render_template("display.html")
