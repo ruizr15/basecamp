@@ -1,5 +1,6 @@
 from app import app
 from flask import render_template, request, redirect, url_for, flash, jsonify
+from datetime import date
 import json, requests
 
 NPSAPIKEY = "obuJbz67KmzxqsJAANbZ7Aem40o9jXusUJwtuHwe"
@@ -12,11 +13,11 @@ park_list = []
 selected_park = {}
 forecasts = []
 
-
 # Returns list of weather forecasts for given coordinates
 def get_forecasts(latitude, longitude):
     # Pulls data from weather API to convert coordinates to grid
     url = "https://api.weather.gov/points/" + latitude + "," + longitude
+    print("get data pull from url " + url)
     r = requests.get(url)
     data = r.json()
     gridID = data["properties"]["gridId"]
@@ -45,6 +46,11 @@ def weather_icon(forecast):
         else:
             print(word)
 
+# Gets next days of the week for a certain number of days of the week
+def next_days(duration):
+    today = datetime.datetime.today().weekday()
+    
+
 @app.route("/", methods=["POST", "GET"])
 def index():
     return redirect("/login")
@@ -56,32 +62,10 @@ def login():
         return redirect("/parks")
     return render_template("login.html")
 
-@app.route("/coordinates", methods=["GET", "POST"])
-def coordinates():
-    return render_template("coordinates.html")
-
-@app.route("/weather", methods=["GET", "POST"])
-def weather():
-    if request.method == "POST":
-        headers = {"User-Agent": "Basecamp, ricardoruiz358@gmail.com"}
-        lat = request.form["latitude"]
-        lon = request.form["longitude"]
-        url = "https://api.weather.gov/points/" + str(lat) + "," + str(lon)
-        r = requests.get(url, headers)
-        data = r.json()
-        gridID = data['properties']['gridId']
-        gridX = data['properties']['gridX']
-        gridY = data['properties']['gridY']
-        url2 = "https://api.weather.gov/gridpoints/"+gridID+"/"+str(gridX)+","+str(gridY)+"/forecast"
-        v = requests.get(url2, headers)
-        more_data = v.json()
-        forecast = more_data['properties']['periods'][0]['shortForecast']
-        return forecast_today
-
-
 @app.route("/parks", methods=["GET", "POST"])
 def parks():
     global park_list
+    icon_urls = []
     # Pulls NPS list of campsites from user-inputted state
     if request.method == "POST":
         # Formats user input
@@ -98,6 +82,10 @@ def parks():
             return render_template("parks.html", park_list=["no parks found"])
         for park in data['data']:
             park_list.append(park)
+            
+            # Generate forecast for next three days
+            
+
         # Pass data to HTML
         return render_template("parks.html", park_list=park_list)
     return render_template("parks.html", park_list=[])
@@ -113,6 +101,7 @@ def parkHandler():
         lon = str(selected_park["longitude"])
         if (lat == "" or lon == ""):
             forecasts = ["no data available"]
+            return redirect("/display")
         # Gets weather forecast
         forecasts = get_forecasts(lat, lon)
         print(forecasts[0]['shortForecast'])
