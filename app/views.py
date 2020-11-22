@@ -4,25 +4,11 @@ import json, requests
 
 global park_list
 park_list = []
+NPSAPIKEY = "obuJbz67KmzxqsJAANbZ7Aem40o9jXusUJwtuHwe"
 
 @app.route("/", methods=["POST", "GET"])
 def index():
-    if request.method == "POST":
-        if request.form.get("stateButton"):
-            state=request.form["state"]
-            if state != "":
-                endpoint = "https://developer.nps.gov/api/v1/campgrounds?stateCode="+ str(state) + "&api_key=obuJbz67KmzxqsJAANbZ7Aem40o9jXusUJwtuHwe"
-                HEADERS = {"Authorization": "obuJbz67KmzxqsJAANbZ7Aem40o9jXusUJwtuHwe"}
-                req = requests.get(endpoint)
-                return render_template("index.html", info=req.text)
-            else:
-                return render_template("index.html", info="Input your state to begin")
-        elif request.form.get("coordinatesButton"):
-            return redirect("/coordinates")
-    else:
-        return render_template("index.html", info="Input your state to begin")
-
-
+    return redirect("/login")
 
 @app.route("/login")
 def login():
@@ -59,8 +45,7 @@ def parks():
         state = request.form["state"]
         if state == "00":
             return render_template("parks.html", park_list=[])
-        endpoint = "https://developer.nps.gov/api/v1/campgrounds?stateCode="+ str(state) + "&api_key=obuJbz67KmzxqsJAANbZ7Aem40o9jXusUJwtuHwe"
-        HEADERS = {"Authorization": "obuJbz67KmzxqsJAANbZ7Aem40o9jXusUJwtuHwe"}
+        endpoint = "https://developer.nps.gov/api/v1/campgrounds?stateCode="+ str(state) + "&api_key=" + NPSAPIKEY
         req = requests.get(endpoint)
         data = req.json()
         if data['total'] == "0":
