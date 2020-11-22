@@ -83,14 +83,9 @@
         </div>
     </div>
     
-    {else}
+    {% else %}
     <div class="ui grid">
         <div class="sixteen wide column">
-            <div class="ui raised segment">
-                <h2 class="ui header">Park Description</h2>
-                <p>{{parkDescription}}</p>
-            </div>
-            <div class="ui hidden divider"></div>
             <div class="ui raided segment" style="background-color: lightpink">
                 <h2 class="ui header">
                     <i class="bell icon"></i>
@@ -99,6 +94,11 @@
                     </div>
                 </h2>
             </div>
+            <div class="ui raised segment">
+                <h2 class="ui header">Park Description</h2>
+                <p>{{parkDescription}}</p>
+            </div>
+            <div class="ui hidden divider"></div>
             <div class="ui raised segment">
                 <h2 class="ui header">Park Activities</h2>
                 {% if thingstodo[0] == "No activities listed at this location" %}

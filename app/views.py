@@ -203,6 +203,7 @@ def display():
                 weekend_forecast = forecast
     else:
         valid = False
+        forecasts = "no weather data available"
 
     packingList = {"Clothing": [], "Personal Gear": []}
 
