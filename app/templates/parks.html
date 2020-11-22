@@ -7,7 +7,8 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
   <link rel="stylesheet" href="{{url_for('static', filename='css/parks.css')}}">
-  <title>Basecamp | Search for Parks</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
+  <title>Search for Parks | Basecamp</title>
 </head>
 
 <body>
@@ -91,7 +92,7 @@
         <h2 class="ui header">No campsites are available in this area. Sorry!</h2>
     {% endif %}
 
-    {% if park_list != "no parks found" %}
+    {% if park_list[0] != "no parks found" %}
         <form action="/park-handler" method="POST">
             <div class="ui container">
                 <div class="ui grid" style="text-align:left">
@@ -99,38 +100,42 @@
                         <label>Park Name</label>
                     </div>
                     <div class="two wide column">
-                        <label>today</label>
+                        <label>{{days[0]}}</label>
                     </div>
                     <div class="two wide column">
-                        <label>tomorrow</label>
+                        <label>{{days[1]}}</label>
                     </div>
                     <div class="two wide column">
-                        <label>day after</label>
+                        <label>{{days[2]}}</label>
                     </div>
                 </div>
                 <!-- Segment for a singular park listing -->
                 <div class="ui segments">
                     {% for park in park_list %}
-                    <button class="fluid ui button" type="submit" name="park_index" value={{park_list.index(park)}}>
-                        <div class="ui segment" id="listing">
-                            <div class="ui grid">
-                                <!-- Park name -->
-                                <div class="ten wide column">
-                                    <h2 class="ui header" style="margin:0; position:absolute; top:50%; -ms-transform:translateY(-50%); transform:translateY(-50%)">{{park["name"]}}</h2>
-                                </div>
-                                <!-- Weather icons -->
-                                <div class="two wide column">
-                                    <img class="ui mini rounded image" src="https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/sun-256.png">
-                                </div>
-                                <div class="two wide column">
-                                    <img class="ui mini rounded image" src="https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-22-256.png">
-                                </div>
-                                <div class="two wide column">
-                                    <img class="ui mini rounded image" src="https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/snow-256.png">
+                        <button class="fluid ui button" type="submit" name="park_index" value={{park_list.index(park)}}>
+                            <div class="ui segment" id="listing">
+                                <div class="ui grid">
+                                    <!-- Park name -->
+                                    <div class="ten wide column">
+                                        <h2 class="ui header" style="margin:0; position:absolute; top:50%; -ms-transform:translateY(-50%); transform:translateY(-50%)">{{park["name"]}}</h2>
+                                    </div>
+                                    <!-- Weather icons -->
+                                    {% set park_forecasts = forecasts[park["name"]] %}
+                                    {% if park_forecasts == "no weather data available" %}
+                                    <div class="two wide column">
+                                        <img class="ui mini rounded image" src="https://cdn0.iconfinder.com/data/icons/free-daily-icon-set/512/Wrong-256.png">    
+                                    </div>
+                                    <div class="four wide column">
+                                        <h3 class="ui header">Weather Data Unavailable</h2>
+                                    </div>
+                                    {% else %}
+                                    <div class="two wide column"><img class="ui mini rounded image" src={{park_forecasts[0]["iconUrl"]}}></div>
+                                    <div class="two wide column"><img class="ui mini rounded image" src={{park_forecasts[1]["iconUrl"]}}></div>
+                                    <div class="two wide column"><img class="ui mini rounded image" src={{park_forecasts[2]["iconUrl"]}}></div> 
+                                    {% endif %}
                                 </div>
                             </div>
-                        </div>
-                    </button>
+                        </button>
                     {% endfor %}
                 </div>
             </div>
