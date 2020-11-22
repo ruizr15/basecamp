@@ -124,19 +124,9 @@ def next_days(duration):
 def index():
     return render_template("index.html")
 
-<<<<<<< HEAD
 @app.route("/index", methods=["POST", "GET"])
 def ind2():
     return redirect("/")
-=======
-
-# Landing login page
-@app.route("/login", methods=["POST", "GET"])
-def login():
-    if request.method == "POST":
-        return redirect("/parks")
-    return render_template("login.html")
->>>>>>> 0ec9341bb18f1ced27367691b525319e2ba6d486
 
 
 # Page with state selection for campground listing and selection
