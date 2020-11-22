@@ -11,7 +11,10 @@
 </head>
 
 <body>
+    <!-- Header -->
     <h1>Park Selector</h1>
+
+    <!-- Form to allow the user to pick their state -->
     <form action="#" method="POST">
         <div class="ui form">
             <label>State</label>
@@ -73,8 +76,9 @@
                         </select>
                     </div>
                 </div>
+                <!-- Button to submit state -->
                 <div class="three wide column">
-                    <button class="ui button" type="submit" name="stateSubmit">Search</button>
+                    <button class="ui button" type="submit" name="state_submit" value="yes">Search</button>
                 </div>
             </div>
         </div>
@@ -82,37 +86,45 @@
 
     <div class="ui divider"></div>
 
+    <!-- Checks if NPS campsite list if empty -->
     {% if park_list[0] == "no parks found" %}
         <h2 class="ui header">No campsites are available in this area. Sorry!</h2>
     {% endif %}
+
     {% if park_list[0] != "no parks found" %}
-        <div class="ui container">
-            <!-- segment for a singular park listing -->
-            <div class="ui segments">
-                {% for park in park_list %}
-                <button class="fluid ui button">
-                    <div class="ui segment" id="listing">
-                        <div class="ui grid">
-                            <div class="ten wide column">
-                                <h2 class="ui header" style="margin:0; position:absolute; top:50%; -ms-transform:translateY(-50%); transform:translateY(-50%)">{{park}}</h2>
-                            </div>
-                            <div class="two wide column">
-                                <img class="ui mini rounded image" src="https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/sun-256.png">
-                            </div>
-                            <div class="two wide column">
-                                <img class="ui mini rounded image" src="https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-22-256.png">
-                            </div>
-                            <div class="two wide column">
-                                <img class="ui mini rounded image" src="https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/snow-256.png">
+        <form action="/park-handler" method="POST">
+            <div class="ui container">
+                <!-- Segment for a singular park listing -->
+                <div class="ui segments">
+                    {% for park in park_list %}
+                    <button class="fluid ui button" type="submit" name="park_index" value={{park_list.index(park)}}>
+                        <div class="ui segment" id="listing">
+                            <div class="ui grid">
+                                <!-- Park name -->
+                                <div class="ten wide column">
+                                    <h2 class="ui header" style="margin:0; position:absolute; top:50%; -ms-transform:translateY(-50%); transform:translateY(-50%)">{{park["name"]}}</h2>
+                                </div>
+                                <!-- Weather icons -->
+                                <div class="two wide column">
+                                    <img class="ui mini rounded image" src="https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/sun-256.png">
+                                </div>
+                                <div class="two wide column">
+                                    <img class="ui mini rounded image" src="https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-22-256.png">
+                                </div>
+                                <div class="two wide column">
+                                    <img class="ui mini rounded image" src="https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/snow-256.png">
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </button>
-                {% endfor %}
+                    </button>
+                    {% endfor %}
+                </div>
             </div>
-        </div>
+        </form>
     {% endif %}
-  <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+
+    <!-- Semantic UI -->
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
 </body>
 
 </html>
