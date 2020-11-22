@@ -2,6 +2,8 @@ from app import app
 from flask import render_template, request, redirect, url_for, flash, jsonify
 import json, requests
 
+global park_list
+park_list = []
 
 @app.route("/", methods=["POST", "GET"])
 def index():
@@ -49,8 +51,17 @@ def weather():
         return forecast_today
 
 
-@app.route("/get", methods=["POST"])
-def test():
-    r = requests.get('https://api.weather.gov/points/32.8427,-83.9577')
-    return jsonify(r.json())
-
+@app.route("/parks", methods=["GET", "POST"])
+def parks():
+    global park_list
+    if request.method == "POST":
+        park_list.clear()
+        state = request.form["state"]
+        endpoint = "https://developer.nps.gov/api/v1/campgrounds?stateCode="+ str(state) + "&api_key=***REMOVED***"
+        HEADERS = {"Authorization": "***REMOVED***"}
+        req = requests.get(endpoint)
+        data = req.json()
+        for park in data['data']:
+            park_list.append(park['name'])
+        return render_template("parks.html", park_list=park_list)
+    return render_template("parks.html", park_list=park_list)
