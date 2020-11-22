@@ -12,9 +12,13 @@ NPSAPIKEY = "***REMOVED***"
 def index():
     return redirect("/login")
 
-@app.route("/login")
+@app.route("/login", methods=["POST", "GET"])
 def login():
-    return render_template("login.html")
+    if request.method == "POST":
+        if request.form["continueGuest"]:
+            return redirect("/parks")
+    else:
+        return render_template("login.html")
 
 @app.route("/coordinates", methods=["GET", "POST"])
 def coordinates():
@@ -69,5 +73,5 @@ def parkHandler():
         selected_park = park_list[int(request.form["park_index"])]
         return redirect("/")
 
-@app.route("/parkDisplay", methods=["GET", "POST"])
-def parkDisplay():
+#@app.route("/parkDisplay", methods=["GET", "POST"])
+#def display():
