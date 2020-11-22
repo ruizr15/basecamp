@@ -14,6 +14,15 @@ park_list = []
 selected_park = {}
 forecasts = []
 
+# Returns latitude and longitude of a place
+def get_coordinates(name):
+    input = name.replace(" ", "%20")
+    url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=%s&inputtype=textquery&fields=geometry&key=%s" % (input, GMAPSAPIKEY)
+    r = requests.get(url)
+    data = r.json()
+    for item in data["candidates"]:
+        for m in item:
+
 # Returns list of weather forecasts for given coordinates
 def get_forecasts(latitude, longitude):
     # Pulls data from weather API to convert coordinates to grid
@@ -147,8 +156,5 @@ def display():
 
 @app.route("/testing")
 def testing():
-    forecasts = get_forecasts("33", "-84")
-    weekday_forecasts = get_weekday_forecasts(forecasts, 3)
-    for day in weekday_forecasts:
-        print(day + ": " + weekday_forecasts[day]["shortForecast"] + ", url: " + weekday_forecasts[day]["iconUrl"])
+    get_coordinates("Brickhill Bluff Wilderness Campsite")
     return "hello"
