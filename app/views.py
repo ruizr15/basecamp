@@ -57,11 +57,15 @@ def parks():
     if request.method == "POST":
         park_list.clear()
         state = request.form["state"]
+        if state == "00":
+            return render_template("parks.html", park_list=[])
         endpoint = "https://developer.nps.gov/api/v1/campgrounds?stateCode="+ str(state) + "&api_key=obuJbz67KmzxqsJAANbZ7Aem40o9jXusUJwtuHwe"
         HEADERS = {"Authorization": "obuJbz67KmzxqsJAANbZ7Aem40o9jXusUJwtuHwe"}
         req = requests.get(endpoint)
         data = req.json()
+        if data['total'] == "0":
+            return render_template("parks.html", park_list=["no parks found"])
         for park in data['data']:
             park_list.append(park['name'])
         return render_template("parks.html", park_list=park_list)
-    return render_template("parks.html", park_list=park_list)
+    return render_template("parks.html", park_list=[])

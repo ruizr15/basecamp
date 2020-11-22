@@ -28,6 +28,7 @@
                 <div class="thirteen wide column">
                     <div class="field">
                         <select name="state" class="ui seach dropdown">
+                            <option value="00">Select a State</option>
                             <option value="AL">Alabama</option>
                             <option value="AK">Alaska</option>
                             <option value="AZ">Arizona</option>
@@ -90,29 +91,36 @@
 
     <div class="ui divider"></div>
 
-    <div class="ui container">
-        <!-- segment for a singular park listing -->
-        <div class="ui segments">
-            {% for park in park_list %}
-                <div class="ui segment" id="listing">
-                    <div class="ui grid">
-                        <div class="ten wide column">
-                            <h2 class="ui header" style="margin:0; position:absolute; top:50%; -ms-transform:translateY(-50%); transform:translateY(-50%)">{{park}}</ui>
-                        </div>
-                        <div class="two wide column">
-                            <img class="ui mini rounded image" src="https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/sun-256.png">
-                        </div>
-                        <div class="two wide column">
-                            <img class="ui mini rounded image" src="https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-22-256.png">
-                        </div>
-                        <div class="two wide column">
-                            <img class="ui mini rounded image" src="https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/snow-256.png">
+    {% if park_list[0] == "no parks found" %}
+        <h2 class="ui header">No campsites are available in this area. Sorry!</h2>
+    {% endif %}
+    {% if park_list[0] != "no parks found" %}
+        <div class="ui container">
+            <!-- segment for a singular park listing -->
+            <div class="ui segments">
+                {% for park in park_list %}
+                <button class="fluid ui button">
+                    <div class="ui segment" id="listing">
+                        <div class="ui grid">
+                            <div class="ten wide column">
+                                <h2 class="ui header" style="margin:0; position:absolute; top:50%; -ms-transform:translateY(-50%); transform:translateY(-50%)">{{park}}</h2>
+                            </div>
+                            <div class="two wide column">
+                                <img class="ui mini rounded image" src="https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/sun-256.png">
+                            </div>
+                            <div class="two wide column">
+                                <img class="ui mini rounded image" src="https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-22-256.png">
+                            </div>
+                            <div class="two wide column">
+                                <img class="ui mini rounded image" src="https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/snow-256.png">
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
+                </button>
+                {% endfor %}
+            </div>
         </div>
-    </div>
+    {% endif %}
   <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
 </body>
 
