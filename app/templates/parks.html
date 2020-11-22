@@ -99,13 +99,13 @@
                         <label>Park Name</label>
                     </div>
                     <div class="two wide column">
-                        <label>today</label>
+                        <label>{{days[0]}}</label>
                     </div>
                     <div class="two wide column">
-                        <label>tomorrow</label>
+                        <label>{{days[1]}}</label>
                     </div>
                     <div class="two wide column">
-                        <label>day after</label>
+                        <label>{{days[2]}}</label>
                     </div>
                 </div>
                 <!-- Segment for a singular park listing -->
@@ -119,19 +119,18 @@
                                         <h2 class="ui header" style="margin:0; position:absolute; top:50%; -ms-transform:translateY(-50%); transform:translateY(-50%)">{{park["name"]}}</h2>
                                     </div>
                                     <!-- Weather icons -->
-                                    {% if forecasts[park["name"]]|length %}
-                                        {% for key in forecasts[park["name"]] %}
-                                            <div class="two wide column">
-                                                <img class="ui mini rounded image" src={{forecasts[park["name"]][key]["iconUrl"]}}>
-                                            </div>
-                                        {% endfor %}
+                                    {% set park_forecasts = forecasts[park["name"]] %}
+                                    {% if park_forecasts == "no weather data available" %}
+                                    <div class="two wide column">
+                                        <img class="ui mini rounded image" src="https://cdn0.iconfinder.com/data/icons/free-daily-icon-set/512/Wrong-256.png">    
+                                    </div>
+                                    <div class="four wide column">
+                                        <h3 class="ui header">Weather Data Unavailable</h2>
+                                    </div>
                                     {% else %}
-                                        <div class="two wide column">
-                                            <img class="ui mini rounded image" src="https://cdn0.iconfinder.com/data/icons/free-daily-icon-set/512/Wrong-256.png">
-                                        </div>
-                                        <div class="four wide column">
-                                            <h3 class="ui header" style="margin:0; position:absolute; top:50%; -ms-transform:translateY(-50%); transform:translateY(-50%)">Data unavailable</h3>
-                                        </div>
+                                    <div class="two wide column"><img class="ui mini rounded image" src={{park_forecasts[0]["iconUrl"]}}></div>
+                                    <div class="two wide column"><img class="ui mini rounded image" src={{park_forecasts[1]["iconUrl"]}}></div>
+                                    <div class="two wide column"><img class="ui mini rounded image" src={{park_forecasts[2]["iconUrl"]}}></div> 
                                     {% endif %}
                                 </div>
                             </div>
