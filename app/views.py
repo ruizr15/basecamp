@@ -1,7 +1,7 @@
 import datetime
 
 from app import app
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, url_for
 
 import requests
 
@@ -134,5 +134,37 @@ def display():
     if forecasts[0] != "no data available":
         for forecast in forecasts:
             icon_urls.append(weather_icon(forecast['shortForecast']))
-    return render_template("display.html", parkName=selected_park["name"],
-                           parkDescription=selected_park["description"], thingstodo=thingstodo, forecasts=forecasts, icon_urls=icon_urls)
+
+    packingList = {"Clothing": [], "Personal Gear": []}
+
+    temperature = 50
+    rainy = False
+    clear = True
+
+    if temperature > 60:
+        packingList["Clothing"].append("Shorts")
+        packingList["Clothing"].append("T-shirts")
+    elif 40 < temperature < 60:
+        packingList["Clothing"].append("Long-sleeve shirts")
+        packingList["Clothing"].append("Pants")
+        packingList["Clothing"].append("Sweater/hoodie")
+    elif temperature < 40:
+        packingList["Clothing"].append("Long-sleeve shirts")
+        packingList["Clothing"].append("Pants")
+        packingList["Clothing"].append("Sweater/hoodie")
+        packingList["Clothing"].append("Warm hat")
+        packingList["Clothing"].append("Gloves/mittens")
+        packingList["Clothing"].append("Heavy winter coat")
+    if rainy:
+        packingList["Clothing"].append("Rain jacket")
+        packingList["Clothing"].append("Rain pants")
+        packingList["Personal Gear"].append("Pack cover")
+    if clear:
+        packingList["Clothing"].append("Sunglasses")
+        if temperature > 60:
+            packingList["Personal Gear"].append("Sunscreen")
+    try:
+        imgsrc = selected_park["images"][0]["url"]
+    except IndexError:
+        imgsrc = url_for('static', filename='logo.png')
+    return render_template("display.html", parkName=selected_park["name"], parkDescription=selected_park["description"], thingstodo=thingstodo, forecasts=forecasts, icon_urls=icon_urls, packingList=packingList, imgsrc=imgsrc)
