@@ -16,12 +16,16 @@ forecasts = []
 
 # Returns latitude and longitude of a place
 def get_coordinates(name):
+    coordinates = []
     input = name.replace(" ", "%20")
     url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=%s&inputtype=textquery&fields=geometry&key=%s" % (input, GMAPSAPIKEY)
     r = requests.get(url)
     data = r.json()
+    print(url)
     for item in data["candidates"]:
-        for m in item:
+        coordinates.append(float(item["geometry"]["location"]["lat"]))
+        coordinates.append(float(item["geometry"]["location"]["lng"]))
+    return coordinates
 
 # Returns list of weather forecasts for given coordinates
 def get_forecasts(latitude, longitude):
@@ -36,7 +40,9 @@ def get_forecasts(latitude, longitude):
     url2 = "https://api.weather.gov/gridpoints/"+gridID+"/"+gridX+","+gridY+"/forecast"
     v = requests.get(url2)
     more_data = v.json()
-    return more_data["properties"]["periods"]
+    try: return more_data["properties"]["periods"]
+    except KeyError:
+        return "data unavailable"
 
 # Returns url for weather icon for a given forecast string
 def weather_icon(forecast):
@@ -69,13 +75,16 @@ def next_days(duration):
 # Gets a weather forecast for specified next days of the week
 def get_weekday_forecasts(forecast_list, duration):
     days = next_days(duration)
+    days[0] = "Today"
     weekday_forecasts = {}
     for day in days:
         working_forecast = {}
         for forecast in forecast_list:
             if forecast["name"] == day:
                 working_forecast = forecast
-        working_forecast["iconUrl"] = weather_icon(working_forecast["shortForecast"])
+        try: working_forecast["iconUrl"] = weather_icon(working_forecast["shortForecast"])
+        except KeyError:
+            working_forecast["iconUrl"] = "https://cdn0.iconfinder.com/data/icons/free-daily-icon-set/512/Wrong-256.png"
         weekday_forecasts[day] = working_forecast
     return weekday_forecasts
 
@@ -111,20 +120,23 @@ def parks():
             return render_template("parks.html", park_list=["no parks found"])
         else:
             for park in data['data']:
+                coordinates = []
                 next_forecasts = []
-                print("")
-                park_list.append(park)
                 lat = str(park["latitude"])
                 lon = str(park["longitude"])
                 print(park["name"])
                 if (lat == "" or lon == ""):
-                    forecast_dict[park["name"]] = {}
-                else:
+                    coordinates = get_coordinates(park["name"])
+                    print(coordinates)
+                    if len(coordinates) != 0:
+                        lat = str(coordinates[0])
+                        lon = str(coordinates[1])
+                if (lat != "" and lon != ""):  
+                    print(lat + ", " + lon)
                     forecasts = get_forecasts(lat, lon)
                     next_forecasts = get_weekday_forecasts(forecasts, 3)
                     forecast_dict[park["name"]] = next_forecasts
-                    for day in forecast_dict[park["name"]]:
-                        print (day + ": " + forecast_dict[park["name"]][day]["shortForecast"])
+                    park_list.append(park)
             # Pass data to HTML
             return render_template("parks.html", park_list=park_list, forecasts=forecast_dict)
     return render_template("parks.html", park_list=[])
@@ -156,5 +168,5 @@ def display():
 
 @app.route("/testing")
 def testing():
-    get_coordinates("Brickhill Bluff Wilderness Campsite")
+    print(get_coordinates("Hickory Hill Wilderness Campsite"))
     return "hello"
