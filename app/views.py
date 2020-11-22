@@ -102,38 +102,6 @@ def get_forecasts(name, coordinates, days):
         return forecast_list
     return forecast_list[0:days]
 
-"""
-# Returns list of weather forecasts for given coordinates
-def get_forecasts(latitude, longitude):
-    # Pulls data from weather API to convert coordinates to grid
-    url = "https://api.weather.gov/points/" + latitude + "," + longitude
-    r = requests.get(url)
-    data = r.json()
-    gridID = data["properties"]["gridId"]
-    gridX = str(data["properties"]["gridX"])
-    gridY = str(data["properties"]["gridY"])
-    # Uses grid coordinates to get forecasts
-    url2 = "https://api.weather.gov/gridpoints/"+gridID+"/"+gridX+","+gridY+"/forecast"
-    v = requests.get(url2)
-    more_data = v.json()
-    try: return more_data["properties"]["periods"]
-    except KeyError:
-        return "data unavailable"
-
-def weather_icon(forecast):
-    for word in forecast.split():
-        word = word.lower()
-        if word == "cloudy":
-            return "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-22-256.png"
-        if word == "rain":
-            return "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-30-256.png"
-        if (word == "sunny" or word == "clear"):
-            return "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/sun-256.png"
-        if word == "snow":
-            return "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-24-256.png"
-        if (word == "thunder" or word == "lightning" or word == "thunderstorm"):
-            return "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/flash-cloud-256.png"
-"""
 # Gets next days of the week for a certain number of days of the week
 def next_days(duration):
     today_code = datetime.datetime.today().weekday()
@@ -145,24 +113,6 @@ def next_days(duration):
         days.append(day_list[today_code + i])
     days[0] = "Today"
     return days
-
-"""
-# Gets a weather forecast for specified next days of the week
-def get_weekday_forecasts(forecast_list, duration):
-    days = next_days(duration)
-    days[0] = "Today"
-    weekday_forecasts = {}
-    for day in days:
-        working_forecast = {}
-        for forecast in forecast_list:
-            if forecast["name"] == day:
-                working_forecast = forecast
-        try: working_forecast["iconUrl"] = weather_icon(working_forecast["shortForecast"])
-        except KeyError:
-            working_forecast["iconUrl"] = "https://cdn0.iconfinder.com/data/icons/free-daily-icon-set/512/Wrong-256.png"
-        weekday_forecasts[day] = working_forecast
-    return weekday_forecasts
-"""
 
 @app.route("/", methods=["POST", "GET"])
 def index():
@@ -243,51 +193,54 @@ def display():
     selected_park = selected_park
     forecasts = get_forecasts(selected_park["name"], [selected_park["latitude"], selected_park["longitude"]], "max")
 
-    if forecasts != "no data available":
+    if forecasts != False:
         weekend_forecast = ""
+        valid = True
         for forecast in forecasts:
             if forecast["day"] == "Saturday":
                 weekend_forecast = forecast
             elif (weekend_forecast == "" and forecast["day"] == "Sunday"):
                 weekend_forecast = forecast
+    else:
+        valid = False
 
     packingList = {"Clothing": [], "Personal Gear": []}
 
-    temperature = weekend_forecast["temperature"]
-    if weekend_forecast["iconUrl"] == "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-30-256.png":
-        rainy = True
-    else:
-        rainy = False
-    
-    if weekend_forecast["iconUrl"] == "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/sun-256.png":
-        clear = True
-    else:
-        clear = False
-
-    if temperature > 60:
-        packingList["Clothing"].append("Shorts")
-        packingList["Clothing"].append("T-shirts")
-    elif 40 < temperature < 60:
-        packingList["Clothing"].append("Long-sleeve shirts")
-        packingList["Clothing"].append("Pants")
-        packingList["Clothing"].append("Sweater/hoodie")
-    elif temperature < 40:
-        packingList["Clothing"].append("Long-sleeve shirts")
-        packingList["Clothing"].append("Pants")
-        packingList["Clothing"].append("Sweater/hoodie")
-        packingList["Clothing"].append("Warm hat")
-        packingList["Clothing"].append("Gloves/mittens")
-        packingList["Clothing"].append("Heavy winter coat")
-    if rainy:
-        packingList["Clothing"].append("Rain jacket")
-        packingList["Clothing"].append("Rain pants")
-        packingList["Personal Gear"].append("Pack cover")
-    if clear:
-        packingList["Clothing"].append("Sunglasses")
+    if valid:
+        temperature = weekend_forecast["temperature"]
+        if weekend_forecast["iconUrl"] == "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-30-256.png":
+            rainy = True
+        else:
+            rainy = False
+        
+        if weekend_forecast["iconUrl"] == "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/sun-256.png":
+            clear = True
+        else:
+            clear = False
         if temperature > 60:
-            packingList["Personal Gear"].append("Sunscreen")
+            packingList["Clothing"].append("Shorts")
+            packingList["Clothing"].append("T-shirts")
+        elif 40 < temperature < 60:
+            packingList["Clothing"].append("Long-sleeve shirts")
+            packingList["Clothing"].append("Pants")
+            packingList["Clothing"].append("Sweater/hoodie")
+        elif temperature < 40:
+            packingList["Clothing"].append("Long-sleeve shirts")
+            packingList["Clothing"].append("Pants")
+            packingList["Clothing"].append("Sweater/hoodie")
+            packingList["Clothing"].append("Warm hat")
+            packingList["Clothing"].append("Gloves/mittens")
+            packingList["Clothing"].append("Heavy winter coat")
+        if rainy:
+            packingList["Clothing"].append("Rain jacket")
+            packingList["Clothing"].append("Rain pants")
+            packingList["Personal Gear"].append("Pack cover")
+        if clear:
+            packingList["Clothing"].append("Sunglasses")
+            if temperature > 60:
+                packingList["Personal Gear"].append("Sunscreen")
     try:
         imgsrc = selected_park["images"][0]["url"]
     except IndexError:
         imgsrc = url_for('static', filename='logo.png')
-    return render_template("display.html", parkName=selected_park["name"], parkDescription=selected_park["description"], thingstodo=thingstodo, forecasts=forecasts[0:5], days=next_days(5), packingList=packingList, imgsrc=imgsrc)
+    return render_template("display.html", parkName=selected_park["name"], parkDescription=selected_park["description"], thingstodo=thingstodo, forecasts=forecasts[0:5], days=next_days(5), packingList=packingList, imgsrc=imgsrc, valid=str(valid))
