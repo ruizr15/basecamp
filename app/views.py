@@ -12,10 +12,11 @@ NPSAPIKEY = "obuJbz67KmzxqsJAANbZ7Aem40o9jXusUJwtuHwe"
 def index():
     return redirect("/login")
 
-@app.route("/login")
+@app.route("/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
-        return redirect("/coordinates")
+        print("successfully logged in")
+        return redirect("/parks")
     return render_template("login.html")
 
 @app.route("/coordinates", methods=["GET", "POST"])
