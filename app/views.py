@@ -68,3 +68,6 @@ def parkHandler():
         global selected_park
         selected_park = park_list[int(request.form["park_index"])]
         return redirect("/")
+
+@app.route("/parkDisplay", methods=["GET", "POST"])
+def parkDisplay():
