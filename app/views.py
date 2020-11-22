@@ -14,6 +14,7 @@ park_list = []
 selected_park = {}
 forecasts = []
 
+
 # Returns latitude and longitude of a place
 def get_coordinates(name):
     coordinates = []
@@ -25,6 +26,7 @@ def get_coordinates(name):
         coordinates.append(float(item["geometry"]["location"]["lat"]))
         coordinates.append(float(item["geometry"]["location"]["lng"]))
     return coordinates
+
 
 # Gets icon for a weather forecast
 def weather_icon(forecast):
@@ -40,6 +42,7 @@ def weather_icon(forecast):
             return "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-24-256.png"
         if (word == "thunder" or word == "lightning" or word == "thunderstorm"):
             return "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/flash-cloud-256.png"
+
 
 # Gets a forecast for a specified number of days at a specified location
 def get_forecasts(name, coordinates, days):
@@ -102,6 +105,7 @@ def get_forecasts(name, coordinates, days):
         return forecast_list
     return forecast_list[0:days]
 
+
 # Gets next days of the week for a certain number of days of the week
 def next_days(duration):
     today_code = datetime.datetime.today().weekday()
@@ -114,14 +118,28 @@ def next_days(duration):
     days[0] = "Today"
     return days
 
+
+# Just redirects to the login page
 @app.route("/", methods=["POST", "GET"])
 def index():
     return render_template("index.html")
 
+<<<<<<< HEAD
 @app.route("/index", methods=["POST", "GET"])
 def ind2():
     return redirect("/")
+=======
 
+# Landing login page
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    if request.method == "POST":
+        return redirect("/parks")
+    return render_template("login.html")
+>>>>>>> 0ec9341bb18f1ced27367691b525319e2ba6d486
+
+
+# Page with state selection for campground listing and selection
 @app.route("/parks", methods=["GET", "POST"])
 def parks():
     global park_list
@@ -154,6 +172,9 @@ def parks():
             return render_template("parks.html", park_list=park_list, forecasts=park_forecasts, days=next_days(3))
     return render_template("parks.html", park_list=[], days=next_days(3))
 
+
+# Handles request for a campground based on what the user selects.
+# Stores campground POST from NPS in a global variable
 @app.route("/park-handler", methods=["GET", "POST"])
 def parkHandler():
     if request.method == "POST":
@@ -168,10 +189,20 @@ def parkHandler():
         return redirect("/display")
 
 
+# Called when a campground on the list of campgrounds is clicked. Opens display html template and fills what it can
+# with information
 @app.route("/display")
 def display():
-    global selected_park
+    getActivities()
+    getWeather()
+    getPackingList()
+    getImage()
+    return render_template("display.html", parkName=selected_park["name"], parkDescription=selected_park["description"], thingstodo=thingstodo, forecasts=forecasts[0:5], days=next_days(5), packingList=packingList, imgsrc=imgsrc, valid=str(valid), reasons=reasons)
 
+
+# Prepares list of activities for a campground
+def getActivities():
+    global thingstodo
     # max number of things that will be displayed in the activities tab
     maxItems = 5
     # get a list of things to do for the selected park
@@ -187,6 +218,14 @@ def display():
     else:
         for thing in data['data']:
             thingstodo.append(thing)
+
+
+# Prepares weather information for a campground
+def getWeather():
+    global selected_park
+    global forecasts
+    global valid
+    global weekend_forecast
     # stuff for weather icons
     selected_park = selected_park
     forecasts = get_forecasts(selected_park["name"], [selected_park["latitude"], selected_park["longitude"]], "max")
@@ -203,6 +242,11 @@ def display():
         valid = False
         forecasts = "no weather data available"
 
+
+# Prepares packing list based on weather for a campground
+def getPackingList():
+    global packingList
+    global reasons
     packingList = {"Clothing": [], "Personal Gear": []}
 
     if valid:
@@ -211,18 +255,23 @@ def display():
             rainy = True
         else:
             rainy = False
-        
+
         if weekend_forecast["iconUrl"] == "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/sun-256.png":
             clear = True
         else:
             clear = False
+        reasons = ""
         if temperature > 60:
             packingList["Clothing"].append("Shorts")
             packingList["Clothing"].append("T-shirts")
+            packingList["Personal Gear"].append("Minimum 50 degree sleeping bag")
+            reasons = "the warm weather"
         elif 40 < temperature < 60:
             packingList["Clothing"].append("Long-sleeve shirts")
             packingList["Clothing"].append("Pants")
             packingList["Clothing"].append("Sweater/hoodie")
+            packingList["Personal Gear"].append("Minimum 40 degree sleeping bag")
+            reasons = "the cool weather"
         elif temperature < 40:
             packingList["Clothing"].append("Long-sleeve shirts")
             packingList["Clothing"].append("Pants")
@@ -230,16 +279,31 @@ def display():
             packingList["Clothing"].append("Warm hat")
             packingList["Clothing"].append("Gloves/mittens")
             packingList["Clothing"].append("Heavy winter coat")
+            packingList["Personal Gear"].append("Minimum 30 degree sleeping bag")
+            reasons = "the cold weather"
         if rainy:
             packingList["Clothing"].append("Rain jacket")
             packingList["Clothing"].append("Rain pants")
             packingList["Personal Gear"].append("Pack cover")
+            if reasons != "":
+                reasons += " and possible rain"
+            else:
+                reasons = " the possible rain"
         if clear:
             packingList["Clothing"].append("Sunglasses")
+            if reasons != "":
+                reasons += " and low cloud cover"
+            else:
+                reasons = " the low cloud cover"
             if temperature > 60:
                 packingList["Personal Gear"].append("Sunscreen")
+        reasons += " this weekend:"
+
+
+# Prepares image for a campground
+def getImage():
+    global imgsrc
     try:
         imgsrc = selected_park["images"][0]["url"]
     except IndexError:
         imgsrc = url_for('static', filename='logo.png')
-    return render_template("display.html", parkName=selected_park["name"], parkDescription=selected_park["description"], thingstodo=thingstodo, forecasts=forecasts[0:5], days=next_days(5), packingList=packingList, imgsrc=imgsrc, valid=str(valid))
