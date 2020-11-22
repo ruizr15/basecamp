@@ -4,6 +4,7 @@ import datetime
 import json, requests
 
 NPSAPIKEY = "***REMOVED***"
+GMAPSAPIKEY = "***REMOVED***"
 
 global park_list
 global selected_park
@@ -20,10 +21,10 @@ def get_forecasts(latitude, longitude):
     r = requests.get(url)
     data = r.json()
     gridID = data["properties"]["gridId"]
-    gridX = data["properties"]["gridX"]
-    gridY = data["properties"]["gridY"]
+    gridX = str(data["properties"]["gridX"])
+    gridY = str(data["properties"]["gridY"])
     # Uses grid coordinates to get forecasts
-    url2 = "https://api.weather.gov/gridpoints/"+gridID+"/"+str(gridX)+","+str(gridY)+"/forecast"
+    url2 = "https://api.weather.gov/gridpoints/"+gridID+"/"+gridX+","+gridY+"/forecast"
     v = requests.get(url2)
     more_data = v.json()
     return more_data["properties"]["periods"]
@@ -42,13 +43,33 @@ def weather_icon(forecast):
             return "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-24-256.png"
         if (word == "thunder" or word == "lightning" or word == "thunderstorm"):
             return "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/flash-cloud-256.png"
+        if word == "unavailable":
+            return "https://cdn0.iconfinder.com/data/icons/free-daily-icon-set/512/Wrong-256.png"
 
 # Gets next days of the week for a certain number of days of the week
 def next_days(duration):
     today_code = datetime.datetime.today().weekday()
     day_list = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-    today = day_list[today_code]
-    tomorrow = day_list[today]
+    days = []
+    for i in range(duration):
+        if (today_code + i) > 6:
+            today_code -= 7
+        days.append(day_list[today_code + i])
+    return days
+
+# Gets a weather forecast for specified next days of the week
+def get_weekday_forecasts(forecast_list, duration):
+    days = next_days(duration)
+    weekday_forecasts = {}
+    for day in days:
+        working_forecast = {}
+        for forecast in forecast_list:
+            if forecast["name"] == day:
+                working_forecast = forecast
+        working_forecast["iconUrl"] = weather_icon(working_forecast["shortForecast"])
+        weekday_forecasts[day] = working_forecast
+    return weekday_forecasts
+
 
 @app.route("/", methods=["POST", "GET"])
 def index():
@@ -64,6 +85,7 @@ def login():
 @app.route("/parks", methods=["GET", "POST"])
 def parks():
     global park_list
+    forecast_dict = {}
     # Pulls NPS list of campsites from user-inputted state
     if request.method == "POST":
         # Formats user input
@@ -78,19 +100,30 @@ def parks():
         # Error case if NPS data comes back empty
         if data['total'] == "0":
             return render_template("parks.html", park_list=["no parks found"])
-        for park in data['data']:
-            park_list.append(park)
-            
-            # Generate forecast for next three days
-            
-
-        # Pass data to HTML
-        return render_template("parks.html", park_list=park_list)
+        else:
+            for park in data['data']:
+                next_forecasts = []
+                print("")
+                park_list.append(park)
+                lat = str(park["latitude"])
+                lon = str(park["longitude"])
+                print(park["name"])
+                if (lat == "" or lon == ""):
+                    forecast_dict[park["name"]] = {}
+                else:
+                    forecasts = get_forecasts(lat, lon)
+                    next_forecasts = get_weekday_forecasts(forecasts, 3)
+                    forecast_dict[park["name"]] = next_forecasts
+                    for day in forecast_dict[park["name"]]:
+                        print (day + ": " + forecast_dict[park["name"]][day]["shortForecast"])
+            # Pass data to HTML
+            return render_template("parks.html", park_list=park_list, forecasts=forecast_dict)
     return render_template("parks.html", park_list=[])
 
 @app.route("/park-handler", methods=["GET", "POST"])
 def parkHandler():
     if request.method == "POST":
+        global park_list
         global selected_park
         global forecasts
         forecasts = []
@@ -108,8 +141,14 @@ def parkHandler():
 @app.route("/display")
 def display():
     global forecasts
-    icon_urls = []
     if forecasts[0] != "no data available":
-        for forecast in forecasts:
-            icon_urls.append(weather_icon(forecast['shortForecast']))
-        return render_template("display.html", forecasts=forecasts, icon_urls=icon_urls)
+        next_forecasts = get_weekday_forecasts(forecasts, 3)
+        return render_template("display.html", forecasts=next_forecasts)
+
+@app.route("/testing")
+def testing():
+    forecasts = get_forecasts("33", "-84")
+    weekday_forecasts = get_weekday_forecasts(forecasts, 3)
+    for day in weekday_forecasts:
+        print(day + ": " + weekday_forecasts[day]["shortForecast"] + ", url: " + weekday_forecasts[day]["iconUrl"])
+    return "hello"
