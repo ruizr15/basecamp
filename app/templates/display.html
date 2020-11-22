@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
     <link rel="stylesheet" href="/static/css/main.css">
-    <title>Park Display Page</title>
+    <title>{{parkName}} | Basecamp</title>
 </head>
 
 <body>
@@ -16,75 +16,134 @@
 
     <div class="ui divider"></div>
 
-<div class="ui grid">
-    <div class="twelve wide column">
-        <div class="ui raised segment">
-            <h2 class="ui header">Park Description</h2>
-            <p>{{parkDescription}}</p>
-        </div>
-        <div class="ui hidden divider"></div>
-        <div class="ui raised segment">
-            <h2 class="ui header">Park Activities</h2>
-            {% if thingstodo[0] == "No activities listed at this location" %}
-            <div class="header">No activities listed at this location :(</div>
-            {% else %}
-            <div class="ui list">
-                <!-- make an item in a list for every thing to do -->
-                {% for thing in thingstodo %}
-                <div class="item">
-                    <div class="header">{{thing['title']}}</div>
-                    {{thing['shortDescription']}}
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </div>
-        <div class="ui hidden divider"></div>
-        <div class="ui raised segment">
-            <h2 class="ui header">Packing Recommendations</h2>
-            <h3 class="ui header">Here are some recommendations for packing that take into account {{reasons}}</h3>
-            <div class="ui bulleted list">
-                {% for category in packingList %}
-                <div class="item">
-                    <div class="header">{{category}}</div>
-                    <ul>
-                        {% for item in packingList[category] %}
-                        <li style="list-style-type: none;">
-                        <div class="ui checkbox">
-                            <input type="checkbox">
-                                <label>{{item}}</label>
-                            </div>
-                        </li>
-                        {% endfor%}
-                    </ul>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-    <div class="three wide column">
-        <div class="ui raised fluid segments">
-            {% for day in days %}
+    {% if valid == "True" %}
+    <div class="ui grid">
+        <div class="twelve wide column">
             <div class="ui raised segment">
-                <p style="text-align: center">{{day}}</p>
-                <div class="two column very relaxed grid">
-                    <div class="column">
-                        <img class="ui mini rounded image" style="display: block; margin-left: auto; margin-right: auto; width: 50%" src={{forecasts[loop.index0]["iconUrl"]}}>
-                    </div>
-                    <div class="column" style="text-align: center">
-                        <h3 class="ui header">{{forecasts[loop.index0]["temperature"]}}</h3>
-                    </div>
-                </div>
-                
+                <h2 class="ui header">Park Description</h2>
+                <p>{{parkDescription}}</p>
             </div>
-            {% endfor %}
+            <div class="ui hidden divider"></div>
+            <div class="ui raised segment">
+                <h2 class="ui header">Park Activities</h2>
+                {% if thingstodo[0] == "No activities listed at this location" %}
+                <div class="header">No activities listed at this location :(</div>
+                {% else %}
+                <div class="ui list">
+                    <!-- make an item in a list for every thing to do -->
+                    {% for thing in thingstodo %}
+                    <div class="item">
+                        <div class="header">{{thing['title']}}</div>
+                        {{thing['shortDescription']}}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="ui hidden divider"></div>
+            <div class="ui raised segment">
+                <h2 class="ui header">Packing Recommendations</h2>
+                <h3 class="ui header">Here are some recommendations for packing that take into account {{reasons}}</h3>
+                <div class="ui bulleted list">
+                    {% for category in packingList %}
+                    <div class="item">
+                        <div class="header">{{category}}</div>
+                        <ul>
+                            {% for item in packingList[category] %}
+                            <li style="list-style-type: none;">
+                            <div class="ui checkbox">
+                                <input type="checkbox">
+                                    <label>{{item}}</label>
+                                </div>
+                            </li>
+                            {% endfor%}
+                        </ul>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="three wide column">
+            <div class="ui raised fluid segments">
+                {% for day in days %}
+                <div class="ui raised segment">
+                    <p style="text-align: center">{{day}}</p>
+                    <div class="two column very relaxed grid">
+                        <div class="column">
+                            <img class="ui mini rounded image" style="display: block; margin-left: auto; margin-right: auto; width: 50%" src={{forecasts[loop.index0]["iconUrl"]}}>
+                        </div>
+                        <div class="column" style="text-align: center">
+                            <h3 class="ui header">{{forecasts[loop.index0]["temperature"]}}</h3>
+                        </div>
+                    </div>
+                    
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
-</div>
+    
+    {else}
+    <div class="ui grid">
+        <div class="sixteen wide column">
+            <div class="ui raised segment">
+                <h2 class="ui header">Park Description</h2>
+                <p>{{parkDescription}}</p>
+            </div>
+            <div class="ui hidden divider"></div>
+            <div class="ui raided segment" style="background-color: lightpink">
+                <h2 class="ui header">
+                    <i class="bell icon"></i>
+                    <div class="content">
+                      This park has no weather data!
+                    </div>
+                </h2>
+            </div>
+            <div class="ui raised segment">
+                <h2 class="ui header">Park Activities</h2>
+                {% if thingstodo[0] == "No activities listed at this location" %}
+                <div class="header">No activities listed at this location :(</div>
+                {% else %}
+                <div class="ui list">
+                    <!-- make an item in a list for every thing to do -->
+                    {% for thing in thingstodo %}
+                    <div class="item">
+                        <div class="header">{{thing['title']}}</div>
+                        {{thing['shortDescription']}}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="ui hidden divider"></div>
+            <div class="ui raised segment">
+                <h2 class="ui header">Packing Recommendations</h2>
+                <h3 class="ui header">Here are some recommendations for packing that take into account {{reasons}}</h3>
+                <div class="ui bulleted list">
+                    {% for category in packingList %}
+                    <div class="item">
+                        <div class="header">{{category}}</div>
+                        <ul>
+                            {% for item in packingList[category] %}
+                            <li style="list-style-type: none;">
+                            <div class="ui checkbox">
+                                <input type="checkbox">
+                                    <label>{{item}}</label>
+                                </div>
+                            </li>
+                            {% endfor%}
+                        </ul>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
 
+    {% endif %}
 
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
 
+</body>
 
-<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
-
-</body></html>
+</html>
