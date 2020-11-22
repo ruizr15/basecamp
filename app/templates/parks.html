@@ -91,9 +91,23 @@
         <h2 class="ui header">No campsites are available in this area. Sorry!</h2>
     {% endif %}
 
-    {% if park_list[0] != "no parks found" %}
+    {% if park_list != "no parks found" %}
         <form action="/park-handler" method="POST">
             <div class="ui container">
+                <div class="ui grid">
+                    <div class="ten wide column">
+                        <label>Park Name</label>
+                    </div>
+                    <div class="two wide column">
+                        <label>today</label>
+                    </div>
+                    <div class="two wide column">
+                        <label>tomorrow</label>
+                    </div>
+                    <div class="two wide column">
+                        <label>day after</label>
+                    </div>
+                </div>
                 <!-- Segment for a singular park listing -->
                 <div class="ui segments">
                     {% for park in park_list %}
