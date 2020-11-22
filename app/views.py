@@ -21,7 +21,6 @@ def get_coordinates(name):
     url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=%s&inputtype=textquery&fields=geometry&key=%s" % (input, GMAPSAPIKEY)
     r = requests.get(url)
     data = r.json()
-    print(url)
     for item in data["candidates"]:
         coordinates.append(float(item["geometry"]["location"]["lat"]))
         coordinates.append(float(item["geometry"]["location"]["lng"]))
@@ -82,9 +81,6 @@ def get_forecasts(name, coordinates, days):
     special_case = True
     if "properties" in weather_data:
         if "periods" in weather_data["properties"]:
-            print("")
-            print("true")
-            print("")
             for period in weather_data["properties"]["periods"]:
                 if (period["name"] in weekdays) or ((special_case) and (period["name"] == "Today" or "Tonight")):
                     if (period["name"] == "Today" or "Tonight"): 
@@ -96,13 +92,14 @@ def get_forecasts(name, coordinates, days):
                     forecast["longForecast"] = period["detailedForecast"]
                     forecast["temperature"] = period["temperature"]
                     forecast["iconUrl"] = weather_icon(period["shortForecast"])
-                    print(forecast["day"])
                     forecast_list.append(forecast)
                     del(forecast)
         else:
             return False
     else:
         return False
+    if days == "max":
+        return forecast_list
     return forecast_list[0:days]
 
 """
@@ -174,7 +171,6 @@ def index():
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
-        print("successfully logged in")
         return redirect("/parks")
     return render_template("login.html")
 
@@ -218,20 +214,80 @@ def parkHandler():
         global forecasts
         forecasts = []
         # Stores the park chosen by user as global variable
-        print(request.form["park_index"])
         selected_park = park_list[int(request.form["park_index"])]
         # Gets weather forecast
         forecasts = get_forecasts(selected_park["name"], [selected_park["latitude"], selected_park["longitude"]], 3)
         return redirect("/display")
 
+
 @app.route("/display")
 def display():
-    global forecasts
-    if forecasts != "no data available":
-        return render_template("display.html", forecasts=forecasts)
+    global selected_park
 
-@app.route("/testing")
-def testing():
-    forecasts = get_forecasts("hello", [33, -84], 3)
-    print(forecasts)
-    return "hello"
+    # max number of things that will be displayed in the activities tab
+    maxItems = 5
+    # get a list of things to do for the selected park
+    endpoint = "https://developer.nps.gov/api/v1/thingstodo?parkCode=" + selected_park["parkCode"] + "&limit=" + str(
+        maxItems) + "&api_key=" + NPSAPIKEY
+    req = requests.get(endpoint)
+    data = req.json()
+    thingstodo = []
+    # if there are no listed activities, say so
+    if data['total'] == "0":
+        thingstodo=["No activities listed at this location"]
+    # otherwise make a list of things to do and send relevant data to html
+    else:
+        for thing in data['data']:
+            thingstodo.append(thing)
+    # stuff for weather icons
+    selected_park = selected_park
+    forecasts = get_forecasts(selected_park["name"], [selected_park["latitude"], selected_park["longitude"]], "max")
+
+    if forecasts != "no data available":
+        weekend_forecast = ""
+        for forecast in forecasts:
+            if forecast["day"] == "Saturday":
+                weekend_forecast = forecast
+            elif (weekend_forecast == "" and forecast["day"] == "Sunday"):
+                weekend_forecast = forecast
+
+    packingList = {"Clothing": [], "Personal Gear": []}
+
+    temperature = weekend_forecast["temperature"]
+    if weekend_forecast["iconUrl"] == "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-30-256.png":
+        rainy = True
+    else:
+        rainy = False
+    
+    if weekend_forecast["iconUrl"] == "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/sun-256.png":
+        clear = True
+    else:
+        clear = False
+
+    if temperature > 60:
+        packingList["Clothing"].append("Shorts")
+        packingList["Clothing"].append("T-shirts")
+    elif 40 < temperature < 60:
+        packingList["Clothing"].append("Long-sleeve shirts")
+        packingList["Clothing"].append("Pants")
+        packingList["Clothing"].append("Sweater/hoodie")
+    elif temperature < 40:
+        packingList["Clothing"].append("Long-sleeve shirts")
+        packingList["Clothing"].append("Pants")
+        packingList["Clothing"].append("Sweater/hoodie")
+        packingList["Clothing"].append("Warm hat")
+        packingList["Clothing"].append("Gloves/mittens")
+        packingList["Clothing"].append("Heavy winter coat")
+    if rainy:
+        packingList["Clothing"].append("Rain jacket")
+        packingList["Clothing"].append("Rain pants")
+        packingList["Personal Gear"].append("Pack cover")
+    if clear:
+        packingList["Clothing"].append("Sunglasses")
+        if temperature > 60:
+            packingList["Personal Gear"].append("Sunscreen")
+    try:
+        imgsrc = selected_park["images"][0]["url"]
+    except IndexError:
+        imgsrc = url_for('static', filename='logo.png')
+    return render_template("display.html", parkName=selected_park["name"], parkDescription=selected_park["description"], thingstodo=thingstodo, forecasts=forecasts[0:5], days=next_days(5), packingList=packingList, imgsrc=imgsrc)

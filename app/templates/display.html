@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
-    <link rel="stylesheet" href="/static/css/landing-style.css">
+    <link rel="stylesheet" href="/static/css/main.css">
     <title>Park Display Page</title>
 </head>
 
@@ -62,28 +62,22 @@
             </div>
         </div>
     </div>
-    <div class="four wide column">
+    <div class="three wide column">
         <div class="ui raised fluid segments">
-            <div class="ui segment">
-                <p>Today</p>
-                <img class="ui mini rounded image" src={{icon_urls[0]}}>
+            {% for day in days %}
+            <div class="ui raised segment">
+                <p style="text-align: center">{{day}}</p>
+                <div class="two column very relaxed grid">
+                    <div class="column">
+                        <img class="ui mini rounded image" style="display: block; margin-left: auto; margin-right: auto; width: 50%" src={{forecasts[loop.index0]["iconUrl"]}}>
+                    </div>
+                    <div class="column" style="text-align: center">
+                        <h3 class="ui header">{{forecasts[loop.index0]["temperature"]}}</h3>
+                    </div>
+                </div>
+                
             </div>
-            <div class="ui segment">
-                <p>Tomorrow</p>
-                <img class="ui mini rounded image" src={{icon_urls[1]}}>
-            </div>
-            <div class="ui segment">
-                <p>day</p>
-                <img class="ui mini rounded image" src={{icon_urls[2]}}>
-            </div>
-            <div class="ui segment">
-                <p>day</p>
-                <img class="ui mini rounded image" src={{icon_urls[3]}}>
-            </div>
-            <div class="ui segment">
-                <p>day</p>
-                <img class="ui mini rounded image" src={{icon_urls[4]}}>
-            </div>
+            {% endfor %}
         </div>
     </div>
 </div>
