@@ -116,13 +116,11 @@ def next_days(duration):
 
 @app.route("/", methods=["POST", "GET"])
 def index():
-    return redirect("/login")
+    return render_template("index.html")
 
-@app.route("/login", methods=["POST", "GET"])
-def login():
-    if request.method == "POST":
-        return redirect("/parks")
-    return render_template("login.html")
+@app.route("/index", methods=["POST", "GET"])
+def ind2():
+    return redirect("/")
 
 @app.route("/parks", methods=["GET", "POST"])
 def parks():

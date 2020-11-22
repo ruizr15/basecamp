@@ -12,135 +12,151 @@
 </head>
 
 <body>
-    <!-- Header -->
-    <h1>Park Selector</h1>
 
-    <!-- Form to allow the user to pick their state -->
-    <form action="#" method="POST">
-        <div class="ui form">
-            <label>State</label>
-            <div class="ui grid">
-                <div class="thirteen wide column">
-                    <div class="field">
-                        <select name="state" class="ui seach dropdown">
-                            <option value="00">Select a State</option>
-                            <option value="AL">Alabama</option>
-                            <option value="AK">Alaska</option>
-                            <option value="AZ">Arizona</option>
-                            <option value="AR">Arkansas</option>
-                            <option value="CA">California</option>
-                            <option value="CO">Colorado</option>
-                            <option value="CT">Connecticut</option>
-                            <option value="DE">Delaware</option>
-                            <option value="FL">Florida</option>
-                            <option value="GA">Georgia</option>
-                            <option value="HI">Hawaii</option>
-                            <option value="ID">Idaho</option>
-                            <option value="IL">Illinois</option>
-                            <option value="IN">Indiana</option>
-                            <option value="IA">Iowa</option>
-                            <option value="KS">Kansas</option>
-                            <option value="KY">Kentucky</option>
-                            <option value="LA">Louisiana</option>
-                            <option value="ME">Maine</option>
-                            <option value="MD">Maryland</option>
-                            <option value="MA">Massachusetts</option>
-                            <option value="MI">Michigan</option>
-                            <option value="MN">Minnesota</option>
-                            <option value="MS">Mississippi</option>
-                            <option value="MO">Missouri</option>
-                            <option value="MT">Montana</option>
-                            <option value="NE">Nebraska</option>
-                            <option value="NV">Nevada</option>
-                            <option value="NH">New Hampshire</option>
-                            <option value="NJ">New Jersey</option>
-                            <option value="NM">New Mexico</option>
-                            <option value="NY">New York</option>
-                            <option value="NC">North Carolina</option>
-                            <option value="ND">North Dakota</option>
-                            <option value="OH">Ohio</option>
-                            <option value="OK">Oklahoma</option>
-                            <option value="OR">Oregon</option>
-                            <option value="PA">Pennsylvania</option>
-                            <option value="RI">Rhode Island</option>
-                            <option value="SC">South Carolina</option>
-                            <option value="SD">South Dakota</option>
-                            <option value="TN">Tennessee</option>
-                            <option value="TX">Texas</option>
-                            <option value="UT">Utah</option>
-                            <option value="VT">Vermont</option>
-                            <option value="VA">Virginia</option>
-                            <option value="WA">Washington</option>
-                            <option value="WV">West Virginia</option>
-                            <option value="WI">Wisconsin</option>
-                            <option value="WY">Wyoming</option>
-                        </select>
-                    </div>
-                </div>
-                <!-- Button to submit state -->
-                <div class="three wide column">
-                    <button class="ui button" type="submit" name="state_submit" value="yes">Search</button>
-                </div>
-            </div>
+    <div class="ui medium fixed menu">
+        <div class="ui container">
+          <a href="{{url_for('index')}}" class="header item">
+            <img class="logo" src="/static/logo.png">Basecamp</a>
+          <a href="{{url_for('index')}}" class="item">Home</a>
+          <a href="#" class="item">Choose your Park</a>
         </div>
-    </form>
+      </div>
 
-    <div class="ui divider"></div>
-
-    <!-- Checks if NPS campsite list if empty -->
-    {% if park_list[0] == "no parks found" %}
-        <h2 class="ui header">No campsites are available in this area. Sorry!</h2>
-    {% endif %}
-
-    {% if park_list[0] != "no parks found" %}
-        <form action="/park-handler" method="POST">
-            <div class="ui container">
-                <div class="ui grid" style="text-align:left">
-                    <div class="ten wide column">
-                        <label>Park Name</label>
-                    </div>
-                    <div class="two wide column">
-                        <label>{{days[0]}}</label>
-                    </div>
-                    <div class="two wide column">
-                        <label>{{days[1]}}</label>
-                    </div>
-                    <div class="two wide column">
-                        <label>{{days[2]}}</label>
-                    </div>
-                </div>
-                <!-- Segment for a singular park listing -->
-                <div class="ui segments">
-                    {% for park in park_list %}
-                        <button class="fluid ui button" type="submit" name="park_index" value={{park_list.index(park)}}>
-                            <div class="ui segment" id="listing">
-                                <div class="ui grid">
-                                    <!-- Park name -->
-                                    <div class="ten wide column">
-                                        <h2 class="ui header" style="margin:0; position:absolute; top:50%; -ms-transform:translateY(-50%); transform:translateY(-50%)">{{park["name"]}}</h2>
-                                    </div>
-                                    <!-- Weather icons -->
-                                    {% set park_forecasts = forecasts[park["name"]] %}
-                                    {% if park_forecasts == "no weather data available" %}
-                                    <div class="two wide column">
-                                        <img class="ui mini rounded image" src="https://cdn0.iconfinder.com/data/icons/free-daily-icon-set/512/Wrong-256.png">    
-                                    </div>
-                                    <div class="four wide column">
-                                        <h3 class="ui header">Weather Data Unavailable</h2>
-                                    </div>
-                                    {% else %}
-                                    <div class="two wide column"><img class="ui mini rounded image" src={{park_forecasts[0]["iconUrl"]}}></div>
-                                    <div class="two wide column"><img class="ui mini rounded image" src={{park_forecasts[1]["iconUrl"]}}></div>
-                                    <div class="two wide column"><img class="ui mini rounded image" src={{park_forecasts[2]["iconUrl"]}}></div> 
-                                    {% endif %}
+    <!-- Header -->
+    <div class="ui middle aligned center aligned grid">
+        <div class="column">
+            <div class="ui hidden divider"></div>
+            <div class="ui padded raised segment">
+                <h1>Park Selector</h1>
+                <!-- Form to allow the user to pick their state -->
+                <form action="#" method="POST">
+                    <div class="ui form">
+                        <label>State</label>
+                        <div class="ui grid">
+                            <div class="thirteen wide column">
+                                <div class="field">
+                                    <select name="state" class="ui seach dropdown">
+                                        <option value="00">Select a State</option>
+                                        <option value="AL">Alabama</option>
+                                        <option value="AK">Alaska</option>
+                                        <option value="AZ">Arizona</option>
+                                        <option value="AR">Arkansas</option>
+                                        <option value="CA">California</option>
+                                        <option value="CO">Colorado</option>
+                                        <option value="CT">Connecticut</option>
+                                        <option value="DE">Delaware</option>
+                                        <option value="FL">Florida</option>
+                                        <option value="GA">Georgia</option>
+                                        <option value="HI">Hawaii</option>
+                                        <option value="ID">Idaho</option>
+                                        <option value="IL">Illinois</option>
+                                        <option value="IN">Indiana</option>
+                                        <option value="IA">Iowa</option>
+                                        <option value="KS">Kansas</option>
+                                        <option value="KY">Kentucky</option>
+                                        <option value="LA">Louisiana</option>
+                                        <option value="ME">Maine</option>
+                                        <option value="MD">Maryland</option>
+                                        <option value="MA">Massachusetts</option>
+                                        <option value="MI">Michigan</option>
+                                        <option value="MN">Minnesota</option>
+                                        <option value="MS">Mississippi</option>
+                                        <option value="MO">Missouri</option>
+                                        <option value="MT">Montana</option>
+                                        <option value="NE">Nebraska</option>
+                                        <option value="NV">Nevada</option>
+                                        <option value="NH">New Hampshire</option>
+                                        <option value="NJ">New Jersey</option>
+                                        <option value="NM">New Mexico</option>
+                                        <option value="NY">New York</option>
+                                        <option value="NC">North Carolina</option>
+                                        <option value="ND">North Dakota</option>
+                                        <option value="OH">Ohio</option>
+                                        <option value="OK">Oklahoma</option>
+                                        <option value="OR">Oregon</option>
+                                        <option value="PA">Pennsylvania</option>
+                                        <option value="RI">Rhode Island</option>
+                                        <option value="SC">South Carolina</option>
+                                        <option value="SD">South Dakota</option>
+                                        <option value="TN">Tennessee</option>
+                                        <option value="TX">Texas</option>
+                                        <option value="UT">Utah</option>
+                                        <option value="VT">Vermont</option>
+                                        <option value="VA">Virginia</option>
+                                        <option value="WA">Washington</option>
+                                        <option value="WV">West Virginia</option>
+                                        <option value="WI">Wisconsin</option>
+                                        <option value="WY">Wyoming</option>
+                                    </select>
                                 </div>
                             </div>
-                        </button>
-                    {% endfor %}
-                </div>
+                            <!-- Button to submit state -->
+                            <div class="three wide column">
+                                <button class="ui button" type="submit" name="state_submit" value="yes">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
-        </form>
-    {% endif %}
+
+            <div class="ui divider"></div>
+
+            <!-- Checks if NPS campsite list if empty -->
+            {% if park_list[0] == "no parks found" %}
+                <h2 class="ui header">No campsites are available in this area. Sorry!</h2>
+            {% endif %}
+
+            {% if park_list[0] != "no parks found" %}
+                <form action="/park-handler" method="POST">
+                    <div class="ui container">
+                        <div class="ui grid" style="text-align:left">
+                            <div class="ten wide column">
+                                <label>Park Name</label>
+                            </div>
+                            <div class="two wide column">
+                                <label>{{days[0]}}</label>
+                            </div>
+                            <div class="two wide column">
+                                <label>{{days[1]}}</label>
+                            </div>
+                            <div class="two wide column">
+                                <label>{{days[2]}}</label>
+                            </div>
+                        </div>
+                        <!-- Segment for a singular park listing -->
+                        <div class="ui segments">
+                            {% for park in park_list %}
+                                <button class="fluid ui button" type="submit" name="park_index" value={{park_list.index(park)}}>
+                                    <div class="ui segment" id="listing">
+                                        <div class="ui grid">
+                                            <!-- Park name -->
+                                            <div class="ten wide column">
+                                                <h2 class="ui header" style="margin:0; position:absolute; top:50%; -ms-transform:translateY(-50%); transform:translateY(-50%)">{{park["name"]}}</h2>
+                                            </div>
+                                            <!-- Weather icons -->
+                                            {% set park_forecasts = forecasts[park["name"]] %}
+                                            {% if park_forecasts == "no weather data available" %}
+                                            <div class="two wide column">
+                                                <img class="ui mini rounded image" src="https://cdn0.iconfinder.com/data/icons/free-daily-icon-set/512/Wrong-256.png">    
+                                            </div>
+                                            <div class="four wide column">
+                                                <h3 class="ui header">Weather Data Unavailable</h2>
+                                            </div>
+                                            {% else %}
+                                            <div class="two wide column"><img class="ui mini rounded image" src={{park_forecasts[0]["iconUrl"]}}></div>
+                                            <div class="two wide column"><img class="ui mini rounded image" src={{park_forecasts[1]["iconUrl"]}}></div>
+                                            <div class="two wide column"><img class="ui mini rounded image" src={{park_forecasts[2]["iconUrl"]}}></div> 
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
 
     <!-- Semantic UI -->
     <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
