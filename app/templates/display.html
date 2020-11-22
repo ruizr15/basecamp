@@ -11,7 +11,7 @@
 <body>
     <div class="ui grid">
         <div class="ten wide column"><h1 class="ui header">{{parkName}}</h1></div>
-        <div class="six wide column"><img class="ui small rounded image" src="https://cdn.discordapp.com/attachments/540413083818917902/779614411689689088/image0.jpg"></div>
+        <div class="six wide column"><img class="ui small rounded image" src={{imgsrc}}></div>
     </div>
 
     <div class="ui divider"></div>
@@ -41,10 +41,24 @@
         </div>
         <div class="ui hidden divider"></div>
         <div class="ui raised segment">
-            <h2 class="ui header">packing list</h2>
+            <h2 class="ui header">Packing Recommendations</h2>
+            <h3 class="ui header">Here are some recommendations for packing that take into account {{reasons}}</h3>
             <div class="ui bulleted list">
-                {$ for item in packingList $}
-                <div class="item">{{item}}</div>
+                {% for category in packingList %}
+                <div class="item">
+                    <div class="header">{{category}}</div>
+                    <ul>
+                        {% for item in packingList[category] %}
+                        <li style="list-style-type: none;">
+                        <div class="ui checkbox">
+                            <input type="checkbox">
+                                <label>{{item}}</label>
+                            </div>
+                        </li>
+                        {% endfor%}
+                    </ul>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
