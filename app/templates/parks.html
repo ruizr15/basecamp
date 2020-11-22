@@ -111,26 +111,31 @@
                 <!-- Segment for a singular park listing -->
                 <div class="ui segments">
                     {% for park in park_list %}
-                    <button class="fluid ui button" type="submit" name="park_index" value={{park_list.index(park)}}>
-                        <div class="ui segment" id="listing">
-                            <div class="ui grid">
-                                <!-- Park name -->
-                                <div class="ten wide column">
-                                    <h2 class="ui header" style="margin:0; position:absolute; top:50%; -ms-transform:translateY(-50%); transform:translateY(-50%)">{{park["name"]}}</h2>
-                                </div>
-                                <!-- Weather icons -->
-                                <div class="two wide column">
-                                    <img class="ui mini rounded image" src="https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/sun-256.png">
-                                </div>
-                                <div class="two wide column">
-                                    <img class="ui mini rounded image" src="https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-22-256.png">
-                                </div>
-                                <div class="two wide column">
-                                    <img class="ui mini rounded image" src="https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/snow-256.png">
+                        <button class="fluid ui button" type="submit" name="park_index" value={{park_list.index(park)}}>
+                            <div class="ui segment" id="listing">
+                                <div class="ui grid">
+                                    <!-- Park name -->
+                                    <div class="ten wide column">
+                                        <h2 class="ui header" style="margin:0; position:absolute; top:50%; -ms-transform:translateY(-50%); transform:translateY(-50%)">{{park["name"]}}</h2>
+                                    </div>
+                                    <!-- Weather icons -->
+                                    {% if forecasts[park["name"]]|length %}
+                                        {% for key in forecasts[park["name"]] %}
+                                            <div class="two wide column">
+                                                <img class="ui mini rounded image" src={{forecasts[park["name"]][key]["iconUrl"]}}>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="two wide column">
+                                            <img class="ui mini rounded image" src="https://cdn0.iconfinder.com/data/icons/free-daily-icon-set/512/Wrong-256.png">
+                                        </div>
+                                        <div class="four wide column">
+                                            <h3 class="ui header" style="margin:0; position:absolute; top:50%; -ms-transform:translateY(-50%); transform:translateY(-50%)">Data unavailable</h3>
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
-                        </div>
-                    </button>
+                        </button>
                     {% endfor %}
                 </div>
             </div>

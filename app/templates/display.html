@@ -34,26 +34,13 @@
         </div>
         <div class="four wide column">
             <div class="ui raised fluid segments">
+                {% for forecast in forecasts %}
                 <div class="ui segment">
-                    <p>Today</p>
-                    <img class="ui mini rounded image", src={{icon_urls[0]}}>
+                    <p>{{forecasts[forecast]["name"]}}</p>
+                    <img class="ui mini rounded image" src={{forecasts[forecast]["iconUrl"]}}>
+                    <p>{{forecasts[forecast]["temperature"] | string() }}</p>
                 </div>
-                <div class="ui segment">
-                    <p>Tomorrow</p>
-                    <img class="ui mini rounded image", src={{icon_urls[1]}}>
-                </div>
-                <div class="ui segment">
-                    <p>day</p>
-                    <img class="ui mini rounded image", src={{icon_urls[2]}}>
-                </div>
-                <div class="ui segment">
-                    <p>day</p>
-                    <img class="ui mini rounded image", src={{icon_urls[3]}}>
-                </div>
-                <div class="ui segment">
-                    <p>day</p>
-                    <img class="ui mini rounded image", src={{icon_urls[4]}}>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
