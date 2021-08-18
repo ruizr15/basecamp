@@ -1,0 +1,7 @@
+.azure/
+.vscode/
+.idea/
+app/config.py
+venv/
+__pycache__/
+module/

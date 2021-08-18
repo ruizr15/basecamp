@@ -1,10 +1,11 @@
+from app import config
 from app import app
 from flask import render_template, request, redirect, url_for, flash, jsonify
 import datetime
 import json, requests
 
-NPSAPIKEY = "***REMOVED***"
-GMAPSAPIKEY = "***REMOVED***"
+NPSAPIKEY = config.NPSAPIKEY
+GMAPSAPIKEY = config.GMAPSAPIKEY
 
 global park_list
 global selected_park
@@ -19,7 +20,8 @@ forecasts = []
 def get_coordinates(name):
     coordinates = []
     input = name.replace(" ", "%20")
-    url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=%s&inputtype=textquery&fields=geometry&key=%s" % (input, GMAPSAPIKEY)
+    url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=%s&inputtype=textquery&fields=geometry&key=%s" % (
+        input, GMAPSAPIKEY)
     r = requests.get(url)
     data = r.json()
     for item in data["candidates"]:
@@ -36,11 +38,11 @@ def weather_icon(forecast):
             return "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-22-256.png"
         if word == "rain":
             return "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-30-256.png"
-        if (word == "sunny" or word == "clear"):
+        if word == "sunny" or word == "clear":
             return "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/sun-256.png"
         if word == "snow":
             return "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-24-256.png"
-        if (word == "thunder" or word == "lightning" or word == "thunderstorm"):
+        if word == "thunder" or word == "lightning" or word == "thunderstorm":
             return "https://cdn3.iconfinder.com/data/icons/tiny-weather-1/512/flash-cloud-256.png"
 
 
@@ -51,12 +53,12 @@ def get_forecasts(name, coordinates, days):
     lng = str(coordinates[1])
     forecast_list = []
     forecast = {}
-    weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday','Sunday']
+    weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
     # If lat and long are empty, use GMaps to try to resolve
     if (lat == "" or lng == ""):
         coords = get_coordinates(name)
-        if len(coords) == 0: 
+        if len(coords) == 0:
             return False
         else:
             lat = str(coords[0])
@@ -66,7 +68,7 @@ def get_forecasts(name, coordinates, days):
     coordinate_url = "https://api.weather.gov/points/%s,%s" % (lat, lng)
     coordinate_request = requests.get(coordinate_url)
     coordinate_data = coordinate_request.json()
-    
+
     # Check if proper formatting is present
     if ("properties" in coordinate_data):
         gridID = coordinate_data["properties"]["gridId"]
@@ -86,7 +88,7 @@ def get_forecasts(name, coordinates, days):
         if "periods" in weather_data["properties"]:
             for period in weather_data["properties"]["periods"]:
                 if (period["name"] in weekdays) or ((special_case) and (period["name"] == "Today" or "Tonight")):
-                    if (period["name"] == "Today" or "Tonight"): 
+                    if (period["name"] == "Today" or "Tonight"):
                         special_case = False
                     # Creates a new forecast dict to append to the list, then deletes it
                     forecast = {}
@@ -96,7 +98,7 @@ def get_forecasts(name, coordinates, days):
                     forecast["temperature"] = period["temperature"]
                     forecast["iconUrl"] = weather_icon(period["shortForecast"])
                     forecast_list.append(forecast)
-                    del(forecast)
+                    del (forecast)
         else:
             return False
     else:
@@ -124,6 +126,7 @@ def next_days(duration):
 def index():
     return render_template("index.html")
 
+
 @app.route("/index", methods=["POST", "GET"])
 def ind2():
     return redirect("/")
@@ -142,7 +145,7 @@ def parks():
         if state == "00":
             return render_template("parks.html", park_list=[], days=next_days(3))
         # Pulls data from NPS
-        endpoint = "https://developer.nps.gov/api/v1/campgrounds?stateCode="+ str(state) + "&api_key=" + NPSAPIKEY
+        endpoint = "https://developer.nps.gov/api/v1/campgrounds?stateCode=" + str(state) + "&api_key=" + NPSAPIKEY
         req = requests.get(endpoint)
         data = req.json()
         # Error case if NPS data comes back empty
@@ -157,7 +160,7 @@ def parks():
                 else:
                     park_forecasts[park["name"]] = forecasts
                 park_list.append(park)
-                del(forecasts)
+                del (forecasts)
             # Pass data to HTML
             return render_template("parks.html", park_list=park_list, forecasts=park_forecasts, days=next_days(3))
     return render_template("parks.html", park_list=[], days=next_days(3))
@@ -187,7 +190,9 @@ def display():
     getWeather()
     getPackingList()
     getImage()
-    return render_template("display.html", parkName=selected_park["name"], parkDescription=selected_park["description"], thingstodo=thingstodo, forecasts=forecasts[0:5], days=next_days(5), packingList=packingList, imgsrc=imgsrc, valid=str(valid), reasons=reasons)
+    return render_template("display.html", parkName=selected_park["name"], parkDescription=selected_park["description"],
+                           thingstodo=thingstodo, forecasts=forecasts[0:5], days=next_days(5), packingList=packingList,
+                           imgsrc=imgsrc, valid=str(valid), reasons=reasons)
 
 
 # Prepares list of activities for a campground
@@ -203,7 +208,7 @@ def getActivities():
     thingstodo = []
     # if there are no listed activities, say so
     if data['total'] == "0":
-        thingstodo=["No activities listed at this location"]
+        thingstodo = ["No activities listed at this location"]
     # otherwise make a list of things to do and send relevant data to html
     else:
         for thing in data['data']:
@@ -241,7 +246,8 @@ def getPackingList():
 
     if valid:
         temperature = weekend_forecast["temperature"]
-        if weekend_forecast["iconUrl"] == "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-30-256.png":
+        if weekend_forecast[
+            "iconUrl"] == "https://cdn2.iconfinder.com/data/icons/weather-color-2/500/weather-30-256.png":
             rainy = True
         else:
             rainy = False
