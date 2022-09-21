@@ -1,6 +1,6 @@
 # Basecamp
 
-Basecamp is HackGSU's 2020 StateFarm Competition First Place Winner out of over 200 competitors. 
+Basecamp is HackGSU's 2020 State Farm Competition First Place Winner out of over 200 competitors. 
 
 ### What is it?
 
