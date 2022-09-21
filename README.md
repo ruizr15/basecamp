@@ -4,7 +4,7 @@ Basecamp is HackGSU's 2020 State Farm Competition First Place Winner out of over
 
 ### What is it?
 
-Basecamp is a camping trip planning tool that helps you find where to go and what to bring on your campout. Basecamp automatically suggests what to bring based on the weather, activities, and more for hundreds of campsites accross the US. 
+Basecamp is a camping trip planning tool that helps you find where to go and what to bring on your campout. Basecamp automatically suggests what to bring based on the weather, activities, and more for hundreds of campsites accross the U.S. 
 
 ### How does it work?
 
